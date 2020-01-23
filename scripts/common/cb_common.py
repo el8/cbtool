@@ -313,7 +313,7 @@ def get_stores_parms() :
                 _line = _line.strip()
                 if _line.count("server_bootstrap") :
                     _mscp["host"] = _line.split("server_bootstrap")[1].strip()
-                    _lcsp["hostname"] = _mscp["host"]
+                    _lscp["hostname"] = _mscp["host"]
                     break
 
         if _oscp["mode"] == "scalable" :
@@ -328,6 +328,10 @@ def get_stores_parms() :
     except OSError, msg :
         _status = 20
         _fmsg = str(msg) 
+
+    except Exception, e:
+        status = 30
+        _fmsg = str(e)
 
     finally :
         if _status :
