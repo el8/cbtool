@@ -226,6 +226,7 @@ def get_stores_parms() :
     TBD
     '''
     try :
+        _status = 100
         _fmsg = ""
         _home = os.environ["HOME"]        
         _from_file = False
@@ -480,7 +481,8 @@ def get_ms_conn(mscp = None, cn = None) :
     TBD
     '''
     try :
-
+        _status = 100
+        _fmsg = ""
         _my_uuid, _oscp, _mscp, _lscp = get_stores_parms()
 
         _ms_adapter = __import__("lib.stores." + _mscp["kind"] + "_datastore_adapter", \
