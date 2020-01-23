@@ -339,6 +339,16 @@ function retriable_execution {
         echo $OUTPUT
 }
 
+function get_global_sub_attribute {
+    global_attribute=`echo $1 | tr '[:upper:]' '[:lower:]'`
+    global_sub_attribute=`echo $2 | tr '[:upper:]' '[:lower:]'`
+    non_cacheable=$3
+    if [ x"${non_cacheable}" == x ] ; then
+         non_cacheable=0
+    fi
+    retriable_execution "$rediscli -h $oshostname -p $osportnumber -n $osdatabasenumber hget ${osinstance}:GLOBAL:${global_attribute} ${global_sub_attribute}" ${non_cacheable} 
+}
+
 function get_time {
         time=`retriable_execution "$rediscli -h $oshostname -p $osportnumber -n $osdatabasenumber time" 1`
         echo -n $time | cut -d " " -f 1
@@ -852,15 +862,6 @@ function get_vm_uuid_from_hostname {
     echo $fqon | cut -d ':' -f 4
 }
 
-function get_global_sub_attribute {
-    global_attribute=`echo $1 | tr '[:upper:]' '[:lower:]'`
-    global_sub_attribute=`echo $2 | tr '[:upper:]' '[:lower:]'`
-    non_cacheable=$3
-    if [ x"${non_cacheable}" == x ] ; then
-         non_cacheable=0
-    fi
-    retriable_execution "$rediscli -h $oshostname -p $osportnumber -n $osdatabasenumber hget ${osinstance}:GLOBAL:${global_attribute} ${global_sub_attribute}" ${non_cacheable} 
-}
 metricstore_hostname=`get_global_sub_attribute metricstore host`
 metricstore_port=`get_global_sub_attribute metricstore port`
 metricstore_database=`get_global_sub_attribute metricstore database`

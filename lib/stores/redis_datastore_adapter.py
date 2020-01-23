@@ -74,17 +74,14 @@ class RedisMgdConn :
         _test_value = '1'  
 
         try:
-            password = None
-            if self.password != "disabled" :
-                password = str(self.password)
 
             if tout > 0:
                 self.redis_conn = Redis(host = self.host, port = self.port, \
-                                        db = self.dbid, password = password, \
+                                        db = self.dbid, password = None, \
                                         socket_timeout = tout)
             else :
                 self.redis_conn = Redis(host = self.host, port = self.port, \
-                                        db = self.dbid, password = password)
+                                        db = self.dbid, password = None)
 
             self.redis_conn.set(_test_key, _test_value)
             self.redis_conn.delete(_test_key)   
