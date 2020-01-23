@@ -301,8 +301,16 @@ function retriable_execution {
         OUTERR=1
         EXPRESSION=`echo $1 | cut -d ' ' -f 9-15`
 
-        if [[ -f ~/cb_os_cache.txt && ${non_cacheable} -eq 0 ]]; then
+        if [[ -f ~/cb_os_cache.txt ]]; then
             OUTPUT=`cat ~/cb_os_cache.txt | grep "${EXPRESSION}" -m 1 | awk '{print $NF}'`
+            # invalidate the cache entry
+			if [[ ${non_cacheable} -eq 1 ]] ; then
+				if [ x"${OUTPUT}" != x ]; then
+					mv -f ~/cb_os_cache.txt ~/cb_os_cache.txt.bak
+					cat ~/cb_os_cache.txt.bak | grep -v "${EXPRESSION}" > ~/cb_os_cache.txt
+				fi
+                OUTPUT=""
+            fi
         fi
 
         if [ x"${OUTPUT}" == x ]; then
@@ -432,6 +440,13 @@ function be_open_or_die {
         $dir/cb_nmap.py $host $port $proto
         if [ $? -eq 0 ] ; then
             echo "port checker: host $host is open."
+			USE_VPN_IP=`get_global_sub_attribute vm_defaults use_vpn_ip`
+
+			if [ x"$USE_VPN_IP" == x"True" ] ; then
+				# We can no longer cache this value. We now support the rotation
+                # of the VPN server IP addresses and we need to keep it up to date.
+                update_bootstrap_value=`get_global_sub_attribute vpn server_bootstrap 1`
+			fi
             return
         fi
         ((nmapcount=nmapcount+1))
@@ -840,7 +855,11 @@ function get_vm_uuid_from_hostname {
 function get_global_sub_attribute {
     global_attribute=`echo $1 | tr '[:upper:]' '[:lower:]'`
     global_sub_attribute=`echo $2 | tr '[:upper:]' '[:lower:]'`
-    retriable_execution "$rediscli -h $oshostname -p $osportnumber -n $osdatabasenumber hget ${osinstance}:GLOBAL:${global_attribute} ${global_sub_attribute}" 0
+    non_cacheable=$3
+    if [ x"${non_cacheable}" == x ] ; then
+         non_cacheable=0
+    fi
+    retriable_execution "$rediscli -h $oshostname -p $osportnumber -n $osdatabasenumber hget ${osinstance}:GLOBAL:${global_attribute} ${global_sub_attribute}" ${non_cacheable} 
 }
 metricstore_hostname=`get_global_sub_attribute metricstore host`
 metricstore_port=`get_global_sub_attribute metricstore port`

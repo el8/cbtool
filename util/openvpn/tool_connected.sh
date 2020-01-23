@@ -46,7 +46,7 @@ logpath=/var/log/cloudbench/${who}_openvpn_mongo_client.log
 echo "client connected $(date) params: $@" >> $logpath
 
 # NOTE: This will only work if the default cloud is it the one using the VPN.
-(su ${who} bash -c "sleep 5; discovery=\$(${dir}/../../cb cldshow vpn | grep server_discovery | cut -d '|' -f 4); echo discovery is \$discovery; if [ x\${discovery} == xTrue ] ; then ${dir}/../../cb cldalter vpn server_bootstrap $VPNIP; else echo modifying server bootstrap to $VPNIP not allowed; fi" >> $logpath &)
+(su ${who} bash -c "sleep 5; ${dir}/../../cb cldalter vpn server_bootstrap $VPNIP" >> $logpath &)
 
 env | sort >> $logpath
 
